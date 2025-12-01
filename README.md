@@ -19,4 +19,4 @@ Includes: `acme`, `sam`, `9term`, and full Plan9 userspace tools.
 
 ## More Info
 
-Visit [moonlab.org](https://moonlab.org) for more Moonlab projects.
+Visit [pkg.moonlab.org](https://pkg.moonlab.org) for more Moonlab projects.
