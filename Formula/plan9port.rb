@@ -1,4 +1,4 @@
-class plan9port < Formula
+class Plan9port < Formula
   desc "Plan 9 from User Space/Moonlab Port (macOS/arm64)"
   homepage "https://pkg.moonlab.org"
   url "https://github.com/9fans/plan9port/archive/refs/heads/master.tar.gz"
