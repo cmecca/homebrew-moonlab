@@ -10,51 +10,50 @@ class Plan9port < Formula
   depends_on arch: :arm64
 
   def install
+    # Set PLAN9 to the installation prefix
     ENV["PLAN9"] = prefix
     
+    # Run the Plan9 install script
     system "./INSTALL", "-b"
     
-    # Move bin to plan9bin to avoid conflicts
+    # Rename bin to plan9bin to avoid conflicts when creating wrappers
     mv "bin", "plan9bin"
     
-    # Install everything to prefix
+    # Install everything to the prefix
     prefix.install Dir["*"]
     
-    # Create wrapper scripts in the Homebrew bin
-    (bin/"9").write <<~EOS
-      #!/bin/bash
-      export PLAN9=#{prefix}
-      exec #{prefix}/plan9bin/9 "$@"
-    EOS
-    chmod 0755, bin/"9"
-    
-    %w[acme sam 9term].each do |app|
-      (bin/app).write <<~EOS
+    # Create wrapper scripts for ALL executables
+    # These wrappers automatically set PLAN9 before running the real binary
+    Dir["#{prefix}/plan9bin/*"].each do |cmd|
+      next unless File.file?(cmd) && File.executable?(cmd)
+      
+      app_name = File.basename(cmd)
+      
+      (bin/app_name).write <<~EOS
         #!/bin/bash
         export PLAN9=#{prefix}
-        exec #{prefix}/plan9bin/#{app} "$@"
+        exec #{prefix}/plan9bin/#{app_name} "$@"
       EOS
-      chmod 0755, bin/app
+      
+      chmod 0755, bin/app_name
     end
   end
 
   def caveats
     <<~EOS
-      Plan9port GUI applications installed (native macOS):
-        - acme
-        - sam  
-        - 9term
-      
-      Run them directly from your terminal.
-      
-      For full Plan9 environment, use: 9 <command>
+      Plan 9 from User Space
+
+      <https://github.com/9fans/plan9port>
+
+      For the full Plan 9 environment, use: 9 <command>
       Example: 9 ls
-      
+
       PLAN9 is automatically set to: #{prefix}
     EOS
   end
 
   test do
+    # Test that the wrapper works
     system bin/"9", "true"
   end
 end
