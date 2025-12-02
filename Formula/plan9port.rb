@@ -3,7 +3,7 @@ class Plan9port < Formula
   homepage "https://pkg.moonlab.org"
   url "https://github.com/9fans/plan9port/archive/refs/heads/master.tar.gz"
   sha256 "814a1aa814d49b6e1a64a3ade3f5ada1496338c30e977ebe8c60cd2e84e3ef06"
-  version "2025.12.01.2"
+  version "2025.12.01.3"
   license "LPL-1.02"
   
   depends_on :macos
