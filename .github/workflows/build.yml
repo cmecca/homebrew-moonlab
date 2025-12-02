@@ -1,0 +1,45 @@
+name: Build Bottles
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build on macOS ARM64
+    runs-on: macos-14
+    
+    steps:
+      - name: Checkout tap
+        uses: actions/checkout@v4
+      
+      - name: Set up Homebrew
+        run: |
+          # Homebrew is pre-installed on GitHub runners
+          brew update
+      
+      - name: Tap this repository
+        run: |
+          brew tap cmecca/moonlab "$GITHUB_WORKSPACE"
+      
+      - name: Build bottle
+        run: |
+          brew install --build-bottle plan9port
+          brew bottle --json --root-url=https://github.com/cmecca/homebrew-moonlab/releases/download/bottles plan9port
+      
+      - name: Upload bottle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bottles
+          path: "*.bottle.*"
+          if-no-files-found: error
+      
+      - name: Upload bottle JSON
+        uses: actions/upload-artifact@v4
+        with:
+          name: bottle-json
+          path: "*.json"
+          if-no-files-found: error
