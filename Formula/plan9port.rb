@@ -5,29 +5,41 @@ class Plan9port < Formula
   sha256 "814a1aa814d49b6e1a64a3ade3f5ada1496338c30e977ebe8c60cd2e84e3ef06"
   version "0.1.0"
   license "LPL-1.02"
-
+  
   depends_on :macos
   depends_on arch: :arm64
 
+  # Commands to skip - either conflict with system packages or are standard Unix tools
+  # All these are still available via: 9 <command>
+  SKIP_COMMANDS = %w[
+    ssh-agent
+    cat ls grep sed awk diff sort comm date cal bc dc
+    echo basename dirname pwd sleep test kill
+    rm mv cp mkdir ln chmod touch
+    tar gzip gunzip bzip2 bunzip2 compress uncompress
+    tr cut paste join split uniq
+    head tail wc expand unexpand
+    file du df mount
+    ps
+  ].freeze
+
   def install
-    # Set PLAN9 to the installation prefix
     ENV["PLAN9"] = prefix
     
-    # Run the Plan9 install script
     system "./INSTALL", "-b"
     
-    # Rename bin to plan9bin to avoid conflicts when creating wrappers
     mv "bin", "plan9bin"
     
-    # Install everything to the prefix
     prefix.install Dir["*"]
     
-    # Create wrapper scripts for ALL executables
-    # These wrappers automatically set PLAN9 before running the real binary
+    # Create wrappers only for Plan9-specific tools and GUI apps
     Dir["#{prefix}/plan9bin/*"].each do |cmd|
       next unless File.file?(cmd) && File.executable?(cmd)
       
       app_name = File.basename(cmd)
+      
+      # Skip commands that conflict or are standard Unix tools
+      next if SKIP_COMMANDS.include?(app_name)
       
       (bin/app_name).write <<~EOS
         #!/bin/bash
@@ -37,23 +49,29 @@ class Plan9port < Formula
       
       chmod 0755, bin/app_name
     end
+    
+    # Remove conflicting headers
+    rm_f prefix/"include/event.h"
   end
 
   def caveats
     <<~EOS
-      Plan 9 from User Space
-
-      <https://github.com/9fans/plan9port>
-
-      For the full Plan 9 environment, use: 9 <command>
-      Example: 9 ls
-
-      PLAN9 is automatically set to: #{prefix}
+      Plan 9 from User Space installed successfully!
+      
+      GUI applications:
+        acme, sam, 9term, page
+      
+      Plan 9 shell and tools:
+        rc, mk, 9
+      
+      All Plan 9 commands available via: 9 <command>
+      Example: 9 ls, 9 grep, 9 sed
+      
+      No shell configuration needed.
     EOS
   end
 
   test do
-    # Test that the wrapper works
     system bin/"9", "true"
   end
 end
