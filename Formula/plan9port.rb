@@ -12,6 +12,7 @@ class Plan9port < Formula
   bottle do
     root_url "https://github.com/cmecca/homebrew-moonlab/releases/download/bottles"
     sha256 cellar: :any_skip_relocation, arm64_sonoma: "0a42f7a8d03dd45988237e57e0305318b5447f36dbd203eb078abb0f2962e67a"
+    rebuild 1
   end
 
   # GUI applications that should only be accessed via: 9 <command>
