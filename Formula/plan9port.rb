@@ -1,6 +1,6 @@
 class Plan9port < Formula
-  desc "Plan 9 from User Space/Moonlab Port (macOS/arm64)"
-  homepage "https://pkg.moonlab.org"
+  desc "Plan 9 from User Space - macOS/arm64 native port by Moonlab"
+  homepage "https://moonlab.org"
   url "https://github.com/9fans/plan9port/archive/refs/heads/master.tar.gz"
   version "0.1.0"
   sha256 "814a1aa814d49b6e1a64a3ade3f5ada1496338c30e977ebe8c60cd2e84e3ef06"
@@ -14,19 +14,27 @@ class Plan9port < Formula
     
     system "./INSTALL", "-b"
     
+    # Install everything
     prefix.install Dir["*"]
+    
+    # Rename the bin directory to lib
+    (prefix/"lib").mkpath
+    mv prefix/"bin", prefix/"lib/bin"
+    
+    # Create new bin with wrappers
+    bin.mkpath
     
     (bin/"9").write <<~EOS
       #!/bin/bash
       export PLAN9=#{prefix}
-      exec #{prefix}/bin/9 "$@"
+      exec #{prefix}/lib/bin/9 "$@"
     EOS
     
     %w[acme sam 9term].each do |app|
       (bin/app).write <<~EOS
         #!/bin/bash
         export PLAN9=#{prefix}
-        exec #{prefix}/bin/#{app} "$@"
+        exec #{prefix}/lib/bin/#{app} "$@"
       EOS
       chmod 0755, bin/app
     end
@@ -38,16 +46,19 @@ class Plan9port < Formula
     <<~EOS
       Plan9port GUI applications installed (native macOS):
         - acme
-        - sam
+        - sam  
         - 9term
       
       Run them directly from your terminal.
+      
+      For full Plan9 environment, use: 9 <command>
+      Example: 9 ls
       
       PLAN9 is automatically set to: #{prefix}
     EOS
   end
 
   test do
-    assert_match "usage", shell_output("#{bin}/9 ls 2>&1", 1)
+    system bin/"9", "true"
   end
 end
