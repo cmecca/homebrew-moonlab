@@ -1,16 +1,23 @@
 class Plan9port < Formula
   desc "Plan 9 from User Space - macOS native port by Moonlab"
-  homepage "https://moonlab.org"
+  homepage "https://pkg.moonlab.org"
   url "https://github.com/9fans/plan9port/archive/refs/heads/master.tar.gz"
   sha256 "814a1aa814d49b6e1a64a3ade3f5ada1496338c30e977ebe8c60cd2e84e3ef06"
-  version "0.1.0"
+  version "2025.12.01"
   license "LPL-1.02"
   
   depends_on :macos
   depends_on arch: :arm64
 
-  # Commands to skip - either conflict with system packages or are standard Unix tools
-  # All these are still available via: 9 <command>
+  # GUI applications that should only be accessed via: 9 <command>
+  # This avoids namespace pollution and conflicts
+  GUI_APPS = %w[
+    acme sam samterm 9term page
+    clock colors graph plot
+    hoc idiff img paint
+  ].freeze
+
+  # Standard Unix commands to skip (available via: 9 <command>)
   SKIP_COMMANDS = %w[
     ssh-agent
     cat ls grep sed awk diff sort comm date cal bc dc
@@ -19,8 +26,7 @@ class Plan9port < Formula
     tar gzip gunzip bzip2 bunzip2 compress uncompress
     tr cut paste join split uniq
     head tail wc expand unexpand
-    file du df mount
-    ps
+    file du df mount ps
   ].freeze
 
   def install
@@ -29,18 +35,21 @@ class Plan9port < Formula
     system "./INSTALL", "-b"
     
     mv "bin", "plan9bin"
-    
     prefix.install Dir["*"]
     
-    # Create wrappers only for Plan9-specific tools and GUI apps
+    # Create wrappers for all commands EXCEPT GUI apps and system conflicts
     Dir["#{prefix}/plan9bin/*"].each do |cmd|
       next unless File.file?(cmd) && File.executable?(cmd)
       
       app_name = File.basename(cmd)
       
-      # Skip commands that conflict or are standard Unix tools
+      # Skip GUI apps (use via '9 <app>')
+      next if GUI_APPS.include?(app_name)
+      
+      # Skip conflicting Unix commands
       next if SKIP_COMMANDS.include?(app_name)
       
+      # Create wrapper for CLI tools
       (bin/app_name).write <<~EOS
         #!/bin/bash
         export PLAN9=#{prefix}
@@ -57,21 +66,37 @@ class Plan9port < Formula
   def caveats
     <<~EOS
       Plan 9 from User Space installed successfully!
-      
-      GUI applications:
-        acme, sam, 9term, page
-      
-      Plan 9 shell and tools:
-        rc, mk, 9
-      
-      All Plan 9 commands available via: 9 <command>
-      Example: 9 ls, 9 grep, 9 sed
-      
-      No shell configuration needed.
+
+      This is an opinionated package from Moonlab that avoids
+      conflict with existing Unix and popular third-party tooling.
+
+      CLI tools (available directly):
+        rc             Plan 9 shell
+        mk             Plan 9 build tool
+        plumber        Plumber daemon
+        fontsrv        Font server
+        And 100+ other Plan 9 utilities...
+
+      GUI applications (use via '9' launcher):
+        9 acme         Launch the Acme text editor
+        9 sam          Launch the Sam text editor  
+        9 9term        Launch a Plan9 terminal
+        9 page         Launch the Page document viewer
+
+      Plan 9 implementations of Unix tools (use via '9' launcher):
+        9 grep         Plan 9's grep
+        9 sed          Plan 9's sed
+        9 ls           Plan 9's ls
+
+      Documentation: https://9fans.github.io/plan9port/
     EOS
   end
 
   test do
-    system bin/"9", "true"
+    # Test that CLI tools work directly
+    system bin/"rc", "-c", "echo test"
+    
+    # Test that GUI apps work via 9 launcher
+    system "#{prefix}/plan9bin/9", "true"
   end
 end
