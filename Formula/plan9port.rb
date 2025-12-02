@@ -9,11 +9,11 @@ class Plan9port < Formula
   depends_on :macos
   depends_on arch: :arm64
 
-#  bottle do
-#    root_url "https://github.com/cmecca/homebrew-moonlab/releases/download/bottles"
-#    rebuild 1
-#    sha256 cellar: :any_skip_relocation, arm64_sonoma: "0a42f7a8d03dd45988237e57e0305318b5447f36dbd203eb078abb0f2962e67a"
-#  end
+  bottle do
+    root_url "https://github.com/cmecca/homebrew-moonlab/releases/download/bottles"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_sonoma: "456b5d0c0b4cecc3a3eccebfcde6d594fd6f972edc75381a9c79ada2632a7701"
+  end
 
   # GUI applications that should only be accessed via: 9 <command>
   # This avoids namespace pollution and conflicts
