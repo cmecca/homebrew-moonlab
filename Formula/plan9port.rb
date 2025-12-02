@@ -3,17 +3,17 @@ class Plan9port < Formula
   homepage "https://pkg.moonlab.org"
   url "https://github.com/9fans/plan9port/archive/refs/heads/master.tar.gz"
   sha256 "814a1aa814d49b6e1a64a3ade3f5ada1496338c30e977ebe8c60cd2e84e3ef06"
-  version "2025.12.01"
+  version "2025.12.01.2"
   license "LPL-1.02"
   
   depends_on :macos
   depends_on arch: :arm64
 
-  bottle do
-    root_url "https://github.com/cmecca/homebrew-moonlab/releases/download/bottles"
-    rebuild 1
-    sha256 cellar: :any_skip_relocation, arm64_sonoma: "0a42f7a8d03dd45988237e57e0305318b5447f36dbd203eb078abb0f2962e67a"
-  end
+#  bottle do
+#    root_url "https://github.com/cmecca/homebrew-moonlab/releases/download/bottles"
+#    rebuild 1
+#    sha256 cellar: :any_skip_relocation, arm64_sonoma: "0a42f7a8d03dd45988237e57e0305318b5447f36dbd203eb078abb0f2962e67a"
+#  end
 
   # GUI applications that should only be accessed via: 9 <command>
   # This avoids namespace pollution and conflicts
@@ -41,6 +41,10 @@ class Plan9port < Formula
     system "./INSTALL", "-b"
     
     mv "bin", "plan9bin"
+
+    # Fix the 9 launcher script to use the correct PLAN9 path
+    inreplace "plan9bin/9", "PLAN9=${PLAN9:-/usr/local/plan9}", "PLAN9=${PLAN9:-#{prefix}}"
+
     prefix.install Dir["*"]
     
     # Create wrappers for all commands EXCEPT GUI apps and system conflicts
