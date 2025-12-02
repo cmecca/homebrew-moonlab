@@ -12,9 +12,6 @@ brew tap cmecca/moonlab
 <details>
 <summary>
 <strong><code>plan9port</code></strong> — Plan 9 from User Space for macOS  
-<br/>
-<img src="https://img.shields.io/badge/macOS-Sonoma%20%7C%20Tahoe-000000?style=flat-square&logo=apple" />
-<img src="https://img.shields.io/badge/arch-arm64-4c1?style=flat-square" />
 </summary>
 
 Plan 9 from User Space — native macOS port with CLI/GUI separation.
