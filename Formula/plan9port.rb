@@ -43,7 +43,10 @@ class Plan9port < Formula
     mv "bin", "plan9bin"
 
     # Fix the 9 launcher script to use the correct PLAN9 path
-    inreplace "plan9bin/9", "PLAN9=${PLAN9:-/usr/local/plan9}", "PLAN9=${PLAN9:-#{prefix}}"
+    inreplace "plan9bin/9" do |s|
+      s.gsub! "PLAN9=${PLAN9:-/usr/local/plan9}", "PLAN9=${PLAN9:#{prefix}}"
+      s.gsub! "$PLAN9/bin", "$PLAN9/plan9bin"
+    end
 
     prefix.install Dir["*"]
     
