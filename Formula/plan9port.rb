@@ -121,4 +121,3 @@ class Plan9port < Formula
     system bin/"rc", "-c", "echo test"
   end
 end
-
