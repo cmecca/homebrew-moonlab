@@ -6,60 +6,56 @@ class Plan9port < Formula
   sha256 "303cf10c600e35eb186070eb6ffd9cb90a99e1042c48d1ff0ee5079f3fa176dd"
   license "MIT"
 
-  # Apple Silicon only
+  # macos/arm64 only
   depends_on arch: :arm64
   depends_on :macos
 
-  # GUI applications that should only be accessed via: 9 <command>
-  # This avoids namespace pollution and conflicts.
+  # avoid namspace conflicts for GUI apps
+  # access via: `9 <cmd>`
   GUI_APPS = %w[
     acme sam samterm 9term page
     clock colors graph plot
     hoc idiff img paint
   ].freeze
 
-  # Standard Unix commands to skip (available via: 9 <command>)
+  # skip std Unix commands (still avail via `9 <cmd>`)
   SKIP_COMMANDS = [
-    # Core text/file utils
+    # core file utils
     "cat", "ls", "grep", "sed", "awk", "diff", "sort", "comm", "uniq",
     "tr", "cut", "paste", "join", "split", "head", "tail", "wc",
     "expand", "unexpand", "strings",
 
-    # File/filesystem
+    # filesystem
     "mkdir", "rm", "mv", "cp", "ln", "chmod", "chown", "chgrp", "touch",
     "tar", "gzip", "gunzip", "bzip2", "bunzip2", "compress", "uncompress",
     "du", "df", "mount", "umount", "file",
 
-    # Shell/proc/session
+    # shell/proc
     "echo", "basename", "dirname", "pwd", "sleep", "test", "kill",
     "ps", "who", "whoami", "id",
 
-    # Time
+    # time/util
     "date", "cal", "uptime",
 
-    # Networking
+    # network
     "ping", "netstat", "ftp", "telnet",
 
-    # Admin / sensitive
+    # admin
     "passwd", "shutdown", "reboot", "halt", "ssh-agent"
   ].freeze
 
   def install
-    # 1. Build in the source tree
     system "./INSTALL", "-b"
 
-    # 2. Install entire Plan 9 tree into prefix/plan9
     plan9_root = prefix/"plan9"
     plan9_root.install Dir["*"]
 
-    # 3. Fix up internal paths for the final root
     cd plan9_root do
       system "./INSTALL", "-c", "-r", plan9_root.to_s
     end
 
     plan9_bin = plan9_root/"bin"
 
-    # 4. Provide the main `9` launcher
     (bin/"9").write <<~EOS
       #!/bin/sh
       export PLAN9="#{plan9_root}"
@@ -67,19 +63,14 @@ class Plan9port < Formula
     EOS
     chmod 0o755, bin/"9"
 
-    # 5. Provide wrappers for *selected* CLI tools to avoid PATH pollution
     Dir["#{plan9_bin}/*"].each do |cmd_path|
       next unless File.file?(cmd_path) && File.executable?(cmd_path)
 
       cmd = File.basename(cmd_path)
 
-      # `9` itself is handled above
       next if cmd == "9"
 
-      # Skip GUI apps (use via `9 <app>`)
       next if GUI_APPS.include?(cmd)
-
-      # Skip conflicting / sensitive Unix commands
       next if SKIP_COMMANDS.include?(cmd)
 
       (bin/cmd).write <<~EOS
@@ -122,10 +113,8 @@ class Plan9port < Formula
   end
 
   test do
-    # Basic: does the 9 launcher work & run a command?
     assert_match "Plan 9", shell_output("#{bin}/9 ls /")
 
-    # And a direct CLI tool (non-GUI) via PATH
     system bin/"rc", "-c", "echo test"
   end
 end

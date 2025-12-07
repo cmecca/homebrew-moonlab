@@ -1,4 +1,4 @@
-# Cmecca Moonlab Homebrew Tap
+# Moonlab Homebrew Tap
 
 Opinionated Homebrew formulae for Moonlab projects and tools.
 
@@ -9,21 +9,27 @@ This tap is currently focused on:
 
 ---
 
-## Installing formulae
+## Installation
 
 You can install directly from the tap without manually tapping:
 
+```sh
 brew install cmecca/moonlab/<formula>
+```
 
 Or tap once and install normally:
 
+```sh
 brew tap cmecca/moonlab
 brew install <formula>
+```
 
-Or in a brew bundle Brewfile:
+Or in a brew bundle (Brewfile):
 
+```sh
 tap "cmecca/moonlab"
 brew "<formula>"
+```
 
 ---
 
@@ -32,7 +38,7 @@ brew "<formula>"
 This section documents the end-to-end workflow for updating an existing formula
 or adding a new one — including automatic bottle generation via GitHub Actions.
 
-If you ever forget how this works, start here.
+This isn't somethign we do everyday --- these steps are recorded for our benefit.
 
 ---
 
@@ -40,8 +46,10 @@ If you ever forget how this works, start here.
 
 From the local tap checkout:
 
+```sh
 cd /opt/homebrew/Library/Taps/cmecca/homebrew-moonlab
 git checkout -b my-change
+```
 
 ---
 
@@ -61,9 +69,11 @@ No bottle do block is required at this stage — CI will add it later.
 
 Always do at least:
 
+```sh
 brew uninstall <formula> 2>/dev/null || true
 brew install --build-from-source cmecca/moonlab/<formula>
 brew test cmecca/moonlab/<formula>
+```
 
 This confirms:
 - The formula builds
@@ -74,9 +84,11 @@ This confirms:
 
 ### 4. Commit and push
 
+```sh
 git add Formula/<formula>.rb
 git commit -m "<formula>: describe the change"
 git push -u origin my-change
+```
 
 ---
 
@@ -124,7 +136,7 @@ Once CI is green:
 
 ---
 
-### 8. Label the PR with pr-pull ✅
+### 8. Label the PR with pr-pull
 
 Add the label:
 
@@ -157,16 +169,6 @@ The exact same workflow applies:
 
 ## Documentation
 
-- brew help
-- man brew
+- `brew help`
+- `man brew`
 - Homebrew Docs: https://docs.brew.sh
-
----
-
-## Notes
-
-- This tap is intentionally optimized for:
-  - macOS
-  - Apple Silicon
-- Linux support is not required at this time.
-
