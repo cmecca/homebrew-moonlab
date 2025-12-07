@@ -6,6 +6,12 @@ class Plan9port < Formula
   sha256 "814a1aa814d49b6e1a64a3ade3f5ada1496338c30e977ebe8c60cd2e84e3ef06"
   license "MIT"
 
+  bottle do
+    root_url "https://github.com/cmecca/homebrew-moonlab/releases/download/plan9port-2025.12.06.0"
+    rebuild 1
+    sha256 cellar: :any_skip_relocation, arm64_tahoe: "8ec24547714a8fb80ad4ef0c18264dea8c9f47ed04d8fa2b6bf6eb3ba802a5ab"
+  end
+
   # macOS/arm64 only
   depends_on arch: :arm64
   depends_on :macos
