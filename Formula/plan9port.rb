@@ -41,7 +41,7 @@ class Plan9port < Formula
     "ping", "netstat", "ftp", "telnet",
 
     # admin / sensitive / conflicting
-    "passwd", "shutdown", "reboot", "halt", "ssh-agent"
+    "passwd", "shutdown", "reboot", "halt", "ssh-agent", "start", "stop"
   ].freeze
 
   def install
