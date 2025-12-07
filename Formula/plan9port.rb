@@ -110,6 +110,9 @@ class Plan9port < Formula
 
       Documentation:
         https://9fans.github.io/plan9port/
+
+      Package status:
+        https://pkg.moonlab.org/
     EOS
   end
 
