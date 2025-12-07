@@ -1,16 +1,16 @@
 class Plan9port < Formula
   desc "Plan 9 from User Space - macOS native port by Moonlab"
   homepage "https://pkg.moonlab.org"
-  url "https://github.com/9fans/plan9port/archive/refs/heads/master.zip"
+  url "https://github.com/9fans/plan9port/archive/refs/heads/master.tar.gz"
   version "2025.12.06.0"
-  sha256 "303cf10c600e35eb186070eb6ffd9cb90a99e1042c48d1ff0ee5079f3fa176dd"
+  sha256 "814a1aa814d49b6e1a64a3ade3f5ada1496338c30e977ebe8c60cd2e84e3ef06"
   license "MIT"
 
-  # macos/arm64 only
+  # macOS/arm64 only
   depends_on arch: :arm64
   depends_on :macos
 
-  # avoid namspace conflicts for GUI apps
+  # avoid namespace conflicts for GUI apps
   # access via: `9 <cmd>`
   GUI_APPS = %w[
     acme sam samterm 9term page
@@ -18,7 +18,7 @@ class Plan9port < Formula
     hoc idiff img paint
   ].freeze
 
-  # skip std Unix commands (still avail via `9 <cmd>`)
+  # skip std Unix commands (still available via `9 <cmd>`)
   SKIP_COMMANDS = [
     # core file utils
     "cat", "ls", "grep", "sed", "awk", "diff", "sort", "comm", "uniq",
@@ -40,7 +40,7 @@ class Plan9port < Formula
     # network
     "ping", "netstat", "ftp", "telnet",
 
-    # admin
+    # admin / sensitive / conflicting
     "passwd", "shutdown", "reboot", "halt", "ssh-agent"
   ].freeze
 
@@ -56,20 +56,21 @@ class Plan9port < Formula
 
     plan9_bin = plan9_root/"bin"
 
+    # main launcher
     (bin/"9").write <<~EOS
       #!/bin/sh
       export PLAN9="#{plan9_root}"
       exec "#{plan9_bin}/9" "$@"
     EOS
-    chmod 0o755, bin/"9"
+    chmod 0755, bin/"9"
 
+    # wrappers for non-conflicting CLI tools
     Dir["#{plan9_bin}/*"].each do |cmd_path|
-      next unless File.file?(cmd_path) && File.executable?(cmd_path)
+      next unless File.file?(cmd_path)
+      next unless File.executable?(cmd_path)
 
       cmd = File.basename(cmd_path)
-
       next if cmd == "9"
-
       next if GUI_APPS.include?(cmd)
       next if SKIP_COMMANDS.include?(cmd)
 
@@ -78,7 +79,7 @@ class Plan9port < Formula
         export PLAN9="#{plan9_root}"
         exec "#{plan9_bin}/#{cmd}" "$@"
       EOS
-      chmod 0o755, bin/cmd
+      chmod 0755, bin/cmd
     end
   end
 
@@ -113,8 +114,10 @@ class Plan9port < Formula
   end
 
   test do
-    assert_match "Plan 9", shell_output("#{bin}/9 ls /")
+    # 9 launcher should be able to run a simple command
+    assert_match "/usr", shell_output("#{bin}/9 ls /")
 
+    # rc wrapper should work directly
     system bin/"rc", "-c", "echo test"
   end
 end
